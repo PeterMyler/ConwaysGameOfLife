@@ -1,5 +1,5 @@
 # Conways Game of Life
-This is a Python project which implements "Conways Game of Life" and some extra functionalities such as: editing/drawing, pausing, fps limiting and extra modes.
+This is my best effort at implementing an efficient "Conways Game of Life" program with some extra functionalities such as: editing/drawing, pausing, fps limiting and extra modes.
 
 ## Requirements
 This project requires Pygame and Numpy to run
