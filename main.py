@@ -14,10 +14,7 @@ CELL_GEN_CHANCE = 0.5  # chance of cell being live
 
 # fps constants:
 limit_fps = False
-max_fps = 10  # fps limit
-ttime = -1
-time_taken = 0
-fps = 0
+MAX_FPS = 10  # fps limit
 
 # rule types:
 classic = (3, 2, 3)
@@ -28,23 +25,26 @@ tv_noise = (2, 4, 5)
 
 rule_type = classic
 
-# set up pygame:
-window = pg.display.set_mode((SCREEN_SIZE, SCREEN_SIZE))
-pg.display.set_caption('ConwaysGameOfLife')
-window.fill(0)
+# other variables
 INT_RGB = sum(LIVE_CELL_COLOUR[2-i] * (256 ** i) for i in range(3))
-
 arr = np.array([[0] * ARRAY_SIZE] * ARRAY_SIZE, dtype=int)  # initialising main array; 0 - dead cell, 1 - live cell
 all_positions = [[y, x] for y in range(ARRAY_SIZE) for x in range(ARRAY_SIZE)]
+offsets = np.array([[i, j] for i in range(-1, 2) for j in range(-1, 2) if not (i == j == 0)])
 
-# all offsets from a center (vectors to get adjacent cells)
-offsets = np.array([[[i, j] for i in range(0, 2) for j in range(0, 2) if not i == j == 0]])
-
+ttime = -1
+time_taken = 0
+fps = 0
 
 running = True
 paused = False
 
+# set up pygame:
+window = pg.display.set_mode((SCREEN_SIZE, SCREEN_SIZE))
+pg.display.set_caption("Peter\'s Game Of Life")
+window.fill(0)
+
 ################################################
+# functions:
 
 
 def lower_limit(value):
@@ -69,11 +69,11 @@ def randomize_game_array():
 
 
 ################################################
+# main run:
 
 print("running")
 t = time()
 while running:
-    ################################################
     # check if game-window is closed
     if pg.QUIT in [event.type for event in pg.event.get()]: break
 
@@ -98,7 +98,7 @@ while running:
         if mouse_buttons[0]:  # for creating live cells (left click)
             arr[posY, posX] = 1
 
-        elif mouse_buttons[2]:  # for erasing (right click)
+        elif mouse_buttons[2]:  # for deleting live cells (right click)
             arr[posY, posX] = 0
 
         elif mouse_buttons[1]:  # for big eraser (middle click)
@@ -125,7 +125,7 @@ while running:
     ones_len = len(ones)
     ones_percentage = ones_len / (ARRAY_SIZE * ARRAY_SIZE)
 
-    if not paused and ones_len != 0 and (not limit_fps or time() - ttime >= 1/max_fps):
+    if not paused and ones_len != 0 and (not limit_fps or time() - ttime >= 1 / MAX_FPS):
         ttime = time()
 
         # making a list of cells to check the rules for:
