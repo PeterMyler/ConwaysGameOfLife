@@ -61,6 +61,7 @@ def clear_game_array():
 
 
 def randomize_game_array():
+    clear_game_array()
     for j in range(ARRAY_SIZE):
         for i in range(ARRAY_SIZE):
             if random() <= chance: arr[j, i] = 1
@@ -76,7 +77,7 @@ while running:
     if pg.QUIT in [event.type for event in pg.event.get()]: break
 
     ################################################
-    # keyboard controls:
+    # keyboard controls
 
     keys = pg.key.get_pressed()  # get keys pressed
     paused = keys[pg.K_p]                    # p   -> game is paused
@@ -85,21 +86,21 @@ while running:
     if keys[pg.K_ESCAPE]: break              # esc -> exit game
 
     ################################################
-    # mouse inputs:
+    # mouse inputs
 
     mouse_buttons = pg.mouse.get_pressed()
-    if True in mouse_buttons:  # 0 - left, 1 - middle, 2 - right
+    if True in mouse_buttons:
         mouse_pos = pg.mouse.get_pos()
         posX = int(mouse_pos[1] / SCALE)
         posY = int(mouse_pos[0] / SCALE)
 
-        if mouse_buttons[0]:  # for creating live cells (left)
+        if mouse_buttons[0]:  # for creating live cells (left click)
             arr[posY, posX] = 1
 
-        elif mouse_buttons[2]:  # for erasing (right)
+        elif mouse_buttons[2]:  # for erasing (right click)
             arr[posY, posX] = 0
 
-        elif mouse_buttons[1]:  # for big eraser (middle)
+        elif mouse_buttons[1]:  # for big eraser (middle click)
             length = int(ARRAY_SIZE / 5)
 
             x1, x2 = lower_limit(posX - length // 2), upper_limit(posX + round(length / 2), ARRAY_SIZE)
@@ -108,8 +109,8 @@ while running:
             arr[y1:y2, x1:x2] = 0
 
     ################################################
+    # update the screen
 
-    # updating the screen and setting the fps limit:
     pg.surfarray.blit_array(window, np.kron(arr, np.full((SCALE, SCALE), LIVE_CELL_COLOUR)))
 
     text_surface = font.render(f"FPS: {fps}", False, (255, 255, 255))
