@@ -9,9 +9,17 @@ font = pg.font.SysFont('Comic Sans', 30)  # gotta be Comic Sans
 SCREEN_SIZE = 1000  # n*n pixel window
 SCALE = 10  # scale/zoom constant
 ARRAY_SIZE = int(SCREEN_SIZE // SCALE)  # size of the array, based on the scale factor
-LIVE_CELL_COLOUR = 0 * 256 + 255 * 256 + 190 * 256
+LIVE_CELL_COLOUR = (0, 190, 0)  # (R, G, B)
+CELL_GEN_CHANCE = 0.5  # chance of cell being live
 
-# rule types: ()
+# fps constants:
+limit_fps = False
+max_fps = 10  # fps limit
+ttime = -1
+time_taken = 0
+fps = 0
+
+# rule types:
 classic = (3, 2, 3)
 chaotic = (2, 2, 3)
 trippin = (2, 1, 5)  # best with manual start
@@ -20,25 +28,18 @@ tv_noise = (2, 4, 5)
 
 rule_type = classic
 
-# random cell generation:
-chance = 0.5  # chance of cell being live
-
-# setting up game window:
+# set up pygame:
 window = pg.display.set_mode((SCREEN_SIZE, SCREEN_SIZE))
 pg.display.set_caption('ConwaysGameOfLife')
 window.fill(0)
-
-limit_fps = False
-max_fps = 10  # fps limit
-ttime = -1
-time_taken = 0
-fps = 0
+INT_RGB = sum(LIVE_CELL_COLOUR[2-i] * (256 ** i) for i in range(3))
 
 arr = np.array([[0] * ARRAY_SIZE] * ARRAY_SIZE, dtype=int)  # initialising main array; 0 - dead cell, 1 - live cell
 all_positions = [[y, x] for y in range(ARRAY_SIZE) for x in range(ARRAY_SIZE)]
 
 # all offsets from a center (vectors to get adjacent cells)
-offsets = np.array([[-1, -1], [-1, 0], [0, -1], [0, 1], [1, 0], [1, 1], [-1, 1], [1, -1]])
+offsets = np.array([[[i, j] for i in range(0, 2) for j in range(0, 2) if not i == j == 0]])
+
 
 running = True
 paused = False
@@ -64,7 +65,7 @@ def randomize_game_array():
     clear_game_array()
     for j in range(ARRAY_SIZE):
         for i in range(ARRAY_SIZE):
-            if random() <= chance: arr[j, i] = 1
+            if random() <= CELL_GEN_CHANCE: arr[j, i] = 1
 
 
 ################################################
@@ -110,8 +111,7 @@ while running:
 
     ################################################
     # update the screen
-
-    pg.surfarray.blit_array(window, np.kron(arr, np.full((SCALE, SCALE), LIVE_CELL_COLOUR)))
+    pg.surfarray.blit_array(window, np.kron(arr, np.full((SCALE, SCALE), INT_RGB)))
 
     text_surface = font.render(f"FPS: {fps}", False, (255, 255, 255))
     window.blit(text_surface, (0, 0))
@@ -123,14 +123,16 @@ while running:
     # play mode:
     ones = np.argwhere(arr == 1)  # all the locations of live cells (ones)
     ones_len = len(ones)
+    ones_percentage = ones_len / (ARRAY_SIZE * ARRAY_SIZE)
 
     if not paused and ones_len != 0 and (not limit_fps or time() - ttime >= 1/max_fps):
         ttime = time()
 
         # making a list of cells to check the rules for:
-        # (we only need to check live cells and the ones adjacent to them)
-        # (if there are loads of live cells then we just check every position, its faster trust me bro)
-        if ones_len / (ARRAY_SIZE * ARRAY_SIZE) < (0.14 - 0.015 * (rule_type[2] - rule_type[1] + 1)):
+        # only live cells and the ones around them need to be checked
+        # HOWEVER, if there are a lot of live cells then we just check every cell (its faster trust me bro)
+        # I just chose the values through some experimentation
+        if ones_percentage < (0.14 - 0.015 * (rule_type[2] - rule_type[1] + 1)):
             to_check = []
             for offset in offsets:
                 to_check.extend(np.add(ones, [offset] * ones_len))
