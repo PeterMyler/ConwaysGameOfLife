@@ -1,30 +1,30 @@
 import pygame as pg
 import numpy as np
-from random import randint
+from random import random
 from time import time
 pg.font.init()
-font = pg.font.SysFont('Comic Sans MS', 30)
+font = pg.font.SysFont('Comic Sans', 30)  # gotta be Comic Sans
 
-screen_size = 1000  # n*n pixel window
-scale = 10  # scale/zoom constant
-size = int(screen_size // scale)  # size of the array, based on the scale factor
+# constants:
+SCREEN_SIZE = 1000  # n*n pixel window
+SCALE = 10  # scale/zoom constant
+ARRAY_SIZE = int(SCREEN_SIZE // SCALE)  # size of the array, based on the scale factor
+LIVE_CELL_COLOUR = 0 * 256 + 255 * 256 + 190 * 256
 
-live_colour = 0*256 + 255*256 + 190*256
-
-# rule types:
+# rule types: ()
 classic = (3, 2, 3)
 chaotic = (2, 2, 3)
 trippin = (2, 1, 5)  # best with manual start
-flicker = (1, 4, 5)  # cool with manual start
+flicker = (1, 4, 5)  # best with manual start
 tv_noise = (2, 4, 5)
 
 rule_type = classic
 
 # random cell generation:
-chance = 50  # chance of cell being live (percent)
+chance = 0.5  # chance of cell being live
 
 # setting up game window:
-window = pg.display.set_mode((screen_size, screen_size))
+window = pg.display.set_mode((SCREEN_SIZE, SCREEN_SIZE))
 pg.display.set_caption('ConwaysGameOfLife')
 window.fill(0)
 
@@ -34,8 +34,8 @@ ttime = -1
 time_taken = 0
 fps = 0
 
-arr = np.array([[0] * size] * size, dtype=int)  # initialising main array; 0 - dead cell, 1 - live cell
-all_positions = [[y, x] for y in range(size) for x in range(size)]
+arr = np.array([[0] * ARRAY_SIZE] * ARRAY_SIZE, dtype=int)  # initialising main array; 0 - dead cell, 1 - live cell
+all_positions = [[y, x] for y in range(ARRAY_SIZE) for x in range(ARRAY_SIZE)]
 
 # all offsets from a center (vectors to get adjacent cells)
 offsets = np.array([[-1, -1], [-1, 0], [0, -1], [0, 1], [1, 0], [1, 1], [-1, 1], [1, -1]])
@@ -56,37 +56,42 @@ def upper_limit(value, limit):
     else: return value
 
 
+def clear_game_array():
+    arr[:] = 0
+
+
+def randomize_game_array():
+    for j in range(ARRAY_SIZE):
+        for i in range(ARRAY_SIZE):
+            if random() <= chance: arr[j, i] = 1
+
+
 ################################################
 
 print("running")
 t = time()
 while running:
-    # checking if game-window is closed
-    if pg.QUIT in [event.type for event in pg.event.get()]: running = False
+    ################################################
+    # check if game-window is closed
+    if pg.QUIT in [event.type for event in pg.event.get()]: break
 
     ################################################
-
     # keyboard controls:
-    if pg.key.get_pressed()[pg.K_ESCAPE]: running = False  # esc -> exit game
-    if pg.key.get_pressed()[pg.K_c]:  # c -> clear screen
-        arr[:] = 0
-    paused = pg.key.get_pressed()[pg.K_p]  # p -> game is paused
-    if pg.key.get_pressed()[pg.K_r]:
-        arr[:] = 0
-        for j in range(size):
-            for i in range(size):
-                rand_int = randint(0, 100 // chance)
-                if rand_int == 1:
-                    arr[j, i] = 1
+
+    keys = pg.key.get_pressed()  # get keys pressed
+    paused = keys[pg.K_p]                    # p   -> game is paused
+    if keys[pg.K_c]: clear_game_array()      # c   -> clear game
+    if keys[pg.K_r]: randomize_game_array()  # r   -> randomize game
+    if keys[pg.K_ESCAPE]: break              # esc -> exit game
 
     ################################################
-
     # mouse inputs:
+
     mouse_buttons = pg.mouse.get_pressed()
     if True in mouse_buttons:  # 0 - left, 1 - middle, 2 - right
         mouse_pos = pg.mouse.get_pos()
-        posX = int(mouse_pos[1] / scale)
-        posY = int(mouse_pos[0] / scale)
+        posX = int(mouse_pos[1] / SCALE)
+        posY = int(mouse_pos[0] / SCALE)
 
         if mouse_buttons[0]:  # for creating live cells (left)
             arr[posY, posX] = 1
@@ -95,17 +100,17 @@ while running:
             arr[posY, posX] = 0
 
         elif mouse_buttons[1]:  # for big eraser (middle)
-            length = int(size/5)
+            length = int(ARRAY_SIZE / 5)
 
-            x1, x2 = lower_limit(posX - length // 2), upper_limit(posX + round(length / 2), size)
-            y1, y2 = lower_limit(posY - length // 2), upper_limit(posY + round(length / 2), size)
+            x1, x2 = lower_limit(posX - length // 2), upper_limit(posX + round(length / 2), ARRAY_SIZE)
+            y1, y2 = lower_limit(posY - length // 2), upper_limit(posY + round(length / 2), ARRAY_SIZE)
 
             arr[y1:y2, x1:x2] = 0
 
     ################################################
 
     # updating the screen and setting the fps limit:
-    pg.surfarray.blit_array(window, np.kron(arr, np.full((scale, scale), live_colour)))
+    pg.surfarray.blit_array(window, np.kron(arr, np.full((SCALE, SCALE), LIVE_CELL_COLOUR)))
 
     text_surface = font.render(f"FPS: {fps}", False, (255, 255, 255))
     window.blit(text_surface, (0, 0))
@@ -124,7 +129,7 @@ while running:
         # making a list of cells to check the rules for:
         # (we only need to check live cells and the ones adjacent to them)
         # (if there are loads of live cells then we just check every position, its faster trust me bro)
-        if ones_len / (size * size) < (0.14 - 0.015*(rule_type[2]-rule_type[1]+1)):
+        if ones_len / (ARRAY_SIZE * ARRAY_SIZE) < (0.14 - 0.015 * (rule_type[2] - rule_type[1] + 1)):
             to_check = []
             for offset in offsets:
                 to_check.extend(np.add(ones, [offset] * ones_len))
@@ -142,7 +147,7 @@ while running:
         arr_c = np.copy(arr)  # copying array
         for posY, posX in to_check:
             # making sure cell isn't off-screen:
-            if not (0 <= posX <= size - 1 and 0 <= posY <= size - 1): continue
+            if not (0 <= posX <= ARRAY_SIZE - 1 and 0 <= posY <= ARRAY_SIZE - 1): continue
 
             # getting number of neighbours:
             adjacent_cells_arr = arr_c[lower_limit(posY-1):posY + 2, lower_limit(posX-1):posX + 2]
@@ -151,7 +156,7 @@ while running:
 
             # applying the rules:
             # dead cell -> live cell, if it has 3 neighbours
-            if arr_c[posY, posX] == 0 and neighbours == rule_type[0]:  # classic: 3, chaotic: 2
+            if arr_c[posY, posX] == 0 and neighbours == rule_type[0]:
                 arr[posY, posX] = 1
 
             # live cells -> dead cells, if it doesn't have 2 or 3 neighbors
