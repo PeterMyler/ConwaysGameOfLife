@@ -25,7 +25,7 @@ rule_type = classic
 # other variables
 INT_RGB = sum(LIVE_CELL_COLOUR[2-i] * (256 ** i) for i in range(3))
 arr = np.array([[0] * ARRAY_SIZE] * ARRAY_SIZE, dtype=int)  # main array; 0 - dead cell, 1 - live cell
-all_positions = [tuple(y, x) for y in range(ARRAY_SIZE) for x in range(ARRAY_SIZE)]  # array of all positions
+all_positions = [(y, x) for y in range(ARRAY_SIZE) for x in range(ARRAY_SIZE)]  # array of all positions
 offsets = np.array([[i, j] for i in range(-1, 2) for j in range(-1, 2) if not (i == j == 0)])
 
 ttime = -1
