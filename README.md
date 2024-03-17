@@ -9,4 +9,16 @@ pip install pygame
 pip install numpy
 ```
 
-## Main game Rules
+## Game Rules
+
+
+## Controls
+### Keyboard:
+ - *r* - generate random game array
+ - *c* - clear array
+ - *p* - hold to pause game
+ - *esc* - exit
+### Mouse:
+ - *Right click* - set the cell at the cursor to alive
+ - *Left click* - set the cell at the cursor to dead
+ - *Middle click* - set all cells in a square around the cursor to dead
