@@ -11,7 +11,7 @@ SCREEN_SIZE = 1000  # n*n pixel window
 ARRAY_SIZE = int(SCREEN_SIZE // CELL_SIZE)  # size of the array, based on the scale factor
 LIVE_CELL_COLOUR = (0, 190, 0)  # (R, G, B)
 CELL_GEN_CHANCE = 0.5  # chance of cell being alive
-MAX_FPS = 10  # fps limit (set to 0 for no limit)
+MAX_FPS = 0  # fps limit (set to 0 for no limit)
 
 # rule types:
 classic = (3, 2, 3)
