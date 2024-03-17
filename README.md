@@ -10,7 +10,7 @@ pip install numpy
 ```
 
 ## Game Rules
-
+You probably already know them
 
 ## Controls
 ### Keyboard:
