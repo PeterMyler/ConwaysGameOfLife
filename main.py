@@ -3,18 +3,15 @@ import numpy as np
 from random import random
 from time import time
 pg.font.init()
-font = pg.font.SysFont('Comic Sans', 30)  # gotta be Comic Sans
+font = pg.font.SysFont('Comic Sans', 30)  # cus it's gotta be Comic Sans
 
 # constants:
+CELL_SIZE = 4  # size of each cell (CHANGE THIS ONE)
 SCREEN_SIZE = 1000  # n*n pixel window
-SCALE = 10  # scale/zoom constant
-ARRAY_SIZE = int(SCREEN_SIZE // SCALE)  # size of the array, based on the scale factor
+ARRAY_SIZE = int(SCREEN_SIZE // CELL_SIZE)  # size of the array, based on the scale factor
 LIVE_CELL_COLOUR = (0, 190, 0)  # (R, G, B)
-CELL_GEN_CHANCE = 0.5  # chance of cell being live
-
-# fps constants:
-limit_fps = False
-MAX_FPS = 10  # fps limit
+CELL_GEN_CHANCE = 0.5  # chance of cell being alive
+MAX_FPS = 10  # fps limit (set to 0 for no limit)
 
 # rule types:
 classic = (3, 2, 3)
@@ -27,8 +24,8 @@ rule_type = classic
 
 # other variables
 INT_RGB = sum(LIVE_CELL_COLOUR[2-i] * (256 ** i) for i in range(3))
-arr = np.array([[0] * ARRAY_SIZE] * ARRAY_SIZE, dtype=int)  # initialising main array; 0 - dead cell, 1 - live cell
-all_positions = [[y, x] for y in range(ARRAY_SIZE) for x in range(ARRAY_SIZE)]
+arr = np.array([[0] * ARRAY_SIZE] * ARRAY_SIZE, dtype=int)  # main array; 0 - dead cell, 1 - live cell
+all_positions = [tuple(y, x) for y in range(ARRAY_SIZE) for x in range(ARRAY_SIZE)]  # array of all positions
 offsets = np.array([[i, j] for i in range(-1, 2) for j in range(-1, 2) if not (i == j == 0)])
 
 ttime = -1
@@ -44,7 +41,7 @@ pg.display.set_caption("Peter\'s Game Of Life")
 window.fill(0)
 
 ################################################
-# functions:
+# functions
 
 
 def lower_limit(value):
@@ -69,7 +66,7 @@ def randomize_game_array():
 
 
 ################################################
-# main run:
+# main game loop
 
 print("running")
 t = time()
@@ -78,7 +75,7 @@ while running:
     if pg.QUIT in [event.type for event in pg.event.get()]: break
 
     ################################################
-    # keyboard controls
+    # keyboard inputs
 
     keys = pg.key.get_pressed()  # get keys pressed
     paused = keys[pg.K_p]                    # p   -> game is paused
@@ -92,8 +89,8 @@ while running:
     mouse_buttons = pg.mouse.get_pressed()
     if True in mouse_buttons:
         mouse_pos = pg.mouse.get_pos()
-        posX = int(mouse_pos[1] / SCALE)
-        posY = int(mouse_pos[0] / SCALE)
+        posX = int(mouse_pos[1] / CELL_SIZE)
+        posY = int(mouse_pos[0] / CELL_SIZE)
 
         if mouse_buttons[0]:  # for creating live cells (left click)
             arr[posY, posX] = 1
@@ -110,28 +107,22 @@ while running:
             arr[y1:y2, x1:x2] = 0
 
     ################################################
-    # update the screen
-    pg.surfarray.blit_array(window, np.kron(arr, np.full((SCALE, SCALE), INT_RGB)))
+    # play mode
 
-    text_surface = font.render(f"FPS: {fps}", False, (255, 255, 255))
-    window.blit(text_surface, (0, 0))
-
-    pg.display.update()
-
-    ################################################
-
-    # play mode:
     ones = np.argwhere(arr == 1)  # all the locations of live cells (ones)
     ones_len = len(ones)
     ones_percentage = ones_len / (ARRAY_SIZE * ARRAY_SIZE)
+    fps = MAX_FPS
 
-    if not paused and ones_len != 0 and (not limit_fps or time() - ttime >= 1 / MAX_FPS):
+    if not paused and ones_len != 0 and not (MAX_FPS and (time() - ttime < 1 / MAX_FPS)):
         ttime = time()
 
-        # making a list of cells to check the rules for:
-        # only live cells and the ones around them need to be checked
-        # HOWEVER, if there are a lot of live cells then we just check every cell (its faster trust me bro)
-        # I just chose the values through some experimentation
+        # making a list of cells to check the rules for
+        # only live cells and ones around them need to be checked
+        # HOWEVER, if there are a lot of live cells (more than ~14%)
+        # we just check every cell (it's faster, trust me bro)
+        # (I chose the values through some experimentation with the rule types)
+        to_check = []
         if ones_percentage < (0.14 - 0.015 * (rule_type[2] - rule_type[1] + 1)):
             to_check = []
             for offset in offsets:
@@ -140,15 +131,14 @@ while running:
 
             # adding the live sells themselves (the centers)
             to_check.extend(ones)
-            to_check = list(set(map(lambda k: tuple(k), to_check)))  # removing duplicate cell positions
-        else:
-            to_check = all_positions.copy()
+            # removing duplicate cell positions
+            to_check = list(set(map(lambda k: tuple(k), to_check)))
 
         ################################################
 
-        # applying the rules of the game and changing a copy of the array:
+        # creating a copy of the game array and changing the main array
         arr_c = np.copy(arr)  # copying array
-        for posY, posX in to_check:
+        for posY, posX in (to_check or all_positions):
             # making sure cell isn't off-screen:
             if not (0 <= posX <= ARRAY_SIZE - 1 and 0 <= posY <= ARRAY_SIZE - 1): continue
 
@@ -158,18 +148,27 @@ while running:
             # (1 extra neighbour if current cell is live, accounted for later)
 
             # applying the rules:
+
             # dead cell -> live cell, if it has 3 neighbours
             if arr_c[posY, posX] == 0 and neighbours == rule_type[0]:
                 arr[posY, posX] = 1
 
-            # live cells -> dead cells, if it doesn't have 2 or 3 neighbors
-            # ("-1" because we previously count the cell as its own neighbour)
+            # live cells -> dead cells, if it doesn't have 2 to 3 neighbors
             if arr_c[posY, posX] == 1 and not (rule_type[1] <= neighbours - 1 <= rule_type[2]):
                 arr[posY, posX] = 0
 
-    time_taken = time() - t
-    if time_taken != 0:
-        fps = round(1/time_taken, 2)
-    else:
-        fps = 0
-    t = time()
+        time_taken = time() - t
+        if time_taken != 0:
+            fps = round(1/time_taken, 2)
+        t = time()
+
+    ################################################
+    # update the screen
+    pg.surfarray.blit_array(window, np.kron(arr, np.full((CELL_SIZE, CELL_SIZE), INT_RGB)))
+
+    text_surface = font.render(f"FPS: {fps}", False, (255, 255, 255))
+    window.blit(text_surface, (0, 0))
+
+    pg.display.update()
+
+    ################################################
