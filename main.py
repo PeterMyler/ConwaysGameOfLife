@@ -77,10 +77,10 @@ while running:
     ################################################
     # keyboard inputs
 
-    keys = pg.key.get_pressed()  # get keys pressed
-    paused = keys[pg.K_p]                    # p   -> game is paused
-    if keys[pg.K_c]: clear_game_array()      # c   -> clear game
-    if keys[pg.K_r]: randomize_game_array()  # r   -> randomize game
+    keys = pg.key.get_pressed()  # get the state of all keys
+    paused = keys[pg.K_p]                    # p   -> paused game
+    if keys[pg.K_c]: clear_game_array()      # c   -> clear array
+    if keys[pg.K_r]: randomize_game_array()  # r   -> randomize array
     if keys[pg.K_ESCAPE]: break              # esc -> exit game
 
     ################################################
