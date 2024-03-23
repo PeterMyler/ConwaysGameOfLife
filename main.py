@@ -2,7 +2,6 @@ import pygame as pg
 import numpy as np
 from random import random
 from time import time, sleep
-
 pg.font.init()
 
 # constants:
@@ -189,4 +188,4 @@ while True:
     pg.display.update()
 
     ################################################
-    print(f"fps: {fps}; {round(ones_percentage*100, 1)}%")
+    # print(f"fps: {fps}; {round(ones_percentage*100, 1)}%")
