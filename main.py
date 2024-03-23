@@ -6,12 +6,12 @@ pg.font.init()
 font = pg.font.SysFont('Comic Sans', 30)  # cus it's gotta be Comic Sans
 
 # constants:
-CELL_SIZE = 4  # size of each cell (CHANGE THIS ONE)
-SCREEN_SIZE = 1000  # n*n pixel window
+CELL_SIZE = 5  # size of each cell (CHANGE THIS ONE)
+SCREEN_SIZE = 800  # n*n pixel window
 ARRAY_SIZE = int(SCREEN_SIZE // CELL_SIZE)  # size of the array, based on the scale factor
 LIVE_CELL_COLOUR = (0, 190, 0)  # (R, G, B)
 CELL_GEN_CHANCE = 0.5  # chance of cell being alive
-MAX_FPS = 0  # fps limit (set to 0 for no limit)
+MAX_FPS = 10  # fps limit (set to 0 for no limit)
 
 # rule types:
 classic = (3, 2, 3)

@@ -1,5 +1,5 @@
 # Conways Game of Life
-This is my best effort at implementing an efficient "Conways Game of Life" program in Python with some extra functionalities such as: editing/drawing, pausing, fps limiting and extra modes.\
+This is my best effort at implementing a somewhat efficient "Conways Game of Life" program in Python, with some extra functionalities such as: editing/drawing, pausing, fps limiting and extra modes.\
 (I know Python is the last language I should've used for an "efficent" program, but hey. I love Python. So just let me be)
 
 ## Requirements
@@ -10,7 +10,7 @@ pip install numpy
 ```
 
 ## Game Rules
-
+You probably already know them
 
 ## Controls
 ### Keyboard:
