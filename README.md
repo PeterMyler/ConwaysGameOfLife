@@ -16,7 +16,7 @@ You probably already know them
 ### Keyboard:
  - *r* - generate random game array
  - *c* - clear array
- - *p* - hold to pause game
+ - *p* - pause/unpause game
  - *esc* - exit
 ### Mouse:
  - *Right click* - set the cell at the cursor to alive
