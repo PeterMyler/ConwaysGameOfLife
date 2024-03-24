@@ -5,7 +5,7 @@ from time import time, sleep
 pg.font.init()
 
 # constants:
-CELL_SIZE = 2  # size of each cell (CHANGE THIS ONE)
+CELL_SIZE = 5  # size of each cell (CHANGE THIS ONE)
 SCREEN_SIZE = 1000  # n*n pixel window
 ARRAY_SIZE = int(SCREEN_SIZE // CELL_SIZE)  # size of the array, based on the scale factor
 LIVE_CELL_COLOUR = (0, 190, 0)  # (R, G, B)
@@ -39,6 +39,18 @@ window = pg.display.set_mode((SCREEN_SIZE, SCREEN_SIZE))
 pg.display.set_caption("Peter\'s Game Of Life")
 window.fill(0)
 
+# initial state:
+pattern = np.array([[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0],
+                    [1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [1,1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                    [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]])
+pos = (3, 3)
+arr[pos[0]:pos[0]+pattern.shape[1], pos[1]:pos[1]+pattern.shape[0]] = pattern.transpose()
 
 ################################################
 # functions
@@ -86,7 +98,7 @@ while True:
     if keys[pg.K_ESCAPE]: break  # esc -> exit game
     if keys[pg.K_p]:  # p   -> pause/unpause game
         paused = not paused
-        sleep(0.1)
+        while pg.key.get_pressed()[pg.K_p]: pg.display.update()
 
     ################################################
     # mouse inputs
@@ -183,7 +195,7 @@ while True:
     pg.surfarray.blit_array(window, np.kron(arr, np.full((CELL_SIZE, CELL_SIZE), INT_RGB)))
 
     text_surface = font.render(f"FPS: {fps} {'(paused)' if paused else ''}", False, (255, 255, 255))
-    window.blit(text_surface, (0, 0))
+    window.blit(text_surface, (SCREEN_SIZE-170, 0))
 
     pg.display.update()
 
