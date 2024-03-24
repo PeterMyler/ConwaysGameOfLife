@@ -98,7 +98,7 @@ while True:
     if keys[pg.K_ESCAPE]: break  # esc -> exit game
     if keys[pg.K_p]:  # p   -> pause/unpause game
         paused = not paused
-        while pg.key.get_pressed()[pg.K_p]: pg.display.update()
+        sleep(0.1)
 
     ################################################
     # mouse inputs
@@ -195,7 +195,7 @@ while True:
     pg.surfarray.blit_array(window, np.kron(arr, np.full((CELL_SIZE, CELL_SIZE), INT_RGB)))
 
     text_surface = font.render(f"FPS: {fps} {'(paused)' if paused else ''}", False, (255, 255, 255))
-    window.blit(text_surface, (SCREEN_SIZE-170, 0))
+    window.blit(text_surface, (0, SCREEN_SIZE-40))
 
     pg.display.update()
 
