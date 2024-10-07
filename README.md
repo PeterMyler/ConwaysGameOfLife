@@ -1,6 +1,6 @@
 # Conways Game of Life
 This is my best effort at implementing a somewhat efficient "Conways Game of Life" program in Python, with some extra functionalities such as: editing/drawing, pausing, fps limiting and extra modes.\
-(I know Python is the last language I should've used for an "efficient" program, but hey. I love Python. So just let me be)
+(I know Python is the last language I should've used for an "efficient" program, but hey - I love Python, So just let me be)
 
 ## Requirements
 This project requires Pygame and Numpy to run
@@ -10,7 +10,10 @@ pip install numpy
 ```
 
 ## Game Rules
-You probably already know them
+1. Survival: Any live cell with 2 or 3 live neighbors stays alive.
+2. Death by underpopulation: Any live cell with fewer than 2 live neighbors dies.
+3. Death by overpopulation: Any live cell with more than 3 live neighbors dies.
+4. Birth: Any dead cell with exactly 3 live neighbors becomes a live cell.
 
 ## Controls
 ### Keyboard:
